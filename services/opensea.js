@@ -1,6 +1,6 @@
-import axios from 'axios';
+const axios = require('axios')
 
-const API_KEY = '007dd1cd8a3c4abea126d87e40b4a49e';
+const API_KEY = process.env.API_KEY;//'007dd1cd8a3c4abea126d87e40b4a49e';
 
 const config = {
   headers: {
@@ -8,11 +8,11 @@ const config = {
   }
 }
 
-export const collections = () => {
+export const collections = (offset, limit) => {
   axios
-    .get('https://api.opensea.io/api/v1/collections?offset=0&limit=10')
+    .get(`https://api.opensea.io/api/v1/collections?offset=${offset}&limit=${limit}`)
     .then((res) => {
-      console.log(res.data);
+      return res.data;
     })
     .catch(console.error)
 }
@@ -35,11 +35,11 @@ export const singleAsset = (assetContractAddress, tokenId) => {
     .catch(console.error)
 }
 
-export const getAssetsByCollection = (collection) => {
+export const assets = (collection) => {
   axios
     .get(`https://api.opensea.io/api/v1/assets?collection_slug=${collection}`, config)
     .then((res) => {
-      console.log(res.data);
+      return res.data;
     })
     .catch(console.error)
 }

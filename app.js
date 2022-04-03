@@ -1,35 +1,75 @@
-import * as Web3 from 'web3'
-import { OpenSeaPort, Network } from 'opensea-js'
-// import { singleAsset, singleCollection } from './opensea.js'
+const express = require('express')
+const bodyParser = require('body-parser')
+const session = require('express-session')
+const cors = require('cors')
+const errorhandler = require('errorhandler')
+const mongoose = require('mongoose')
+const morgan = require('morgan');
 
-// //singleAsset('0xb47e3cd837ddf8e4c57f05d70ab865de6e193bbb', 1);
-// singleCollection('0xmons-xyz');
+const isProduction = process.env.NODE_ENV === 'production';
 
+// Create global app object
+const app = express();
 
-// const Web3 = require('web3')
-// const opensea = require('opensea-js')
+app.use(cors());
 
-// This example provider won't let you make transactions, only read-only calls:
-const provider = new Web3.default.providers.HttpProvider('https://mainnet.infura.io');
-const seaport = new OpenSeaPort(provider, {
-  networkName: Network.Main,
-  apiKey: '007dd1cd8a3c4abea126d87e40b4a49e'
-})
+// Normal express config defaults
+app.use(morgan('dev'));
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-const getAssetBalance = async () => {
-  const asset = {
-    tokenAddress: "0x06012c8cf97bead5deae237070f9587f8e7a266d", // CryptoKitties
-    tokenId: "1", // Token ID
-  }
-  
-  const balance = await seaport.getAssetBalance({
-    accountAddress: '0xFE25bCF52D3Ad8ccfdfebb0A022c03578dBBF89E', // string
-    asset, // Asset
-  })
+app.use(require('method-override')());
+app.use(express.static(__dirname + '/public'));
 
-  console.log('balance', balance.toNumber())
+app.use(session({ secret: 'conduit', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false  }));
+
+if (!isProduction) {
+  app.use(errorhandler());
 }
 
-getAssetBalance();
+mongoose.connect(process.env.MONGODB_URI);
+if (!isProduction) {
+  mongoose.set('debug', true);
+}
 
+require('./models/Collection');
+app.use(require('./routes'));
 
+/// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  var err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
+
+/// error handlers
+
+// development error handler
+// will print stacktrace
+if (!isProduction) {
+  app.use(function(err, req, res, next) {
+    console.log(err.stack);
+
+    res.status(err.status || 500);
+
+    res.json({'errors': {
+      message: err.message,
+      error: err
+    }});
+  });
+}
+
+// production error handler
+// no stacktraces leaked to user
+app.use(function(err, req, res, next) {
+  res.status(err.status || 500);
+  res.json({'errors': {
+    message: err.message,
+    error: {}
+  }});
+});
+
+// finally, let's start our server...
+const server = app.listen( process.env.PORT || 3000, function(){
+  console.log('Listening on port ' + server.address().port);
+});
