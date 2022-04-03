@@ -32,7 +32,6 @@ if (!isProduction) {
   app.use(errorhandler());
 }
 
-console.log('process.env.MONGODB_URI', process.env.MONGODB_URI)
 mongoose.connect(process.env.MONGODB_URI).then(() => console.info('Mongodb connected'));
 if (!isProduction) {
   mongoose.set('debug', true);
