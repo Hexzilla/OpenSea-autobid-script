@@ -54,17 +54,35 @@ const singleAsset = (assetContractAddress, tokenId) => {
     .catch(console.error)
 }
 
-const createBuyOrder = async (asset, value) => {
-  return await seaport.createBuyOrder({
-    asset: {
-      tokenId: asset.tokenId,
-      tokenAddress: asset.tokenAddress,
-      schemaName: asset.schema_name // WyvernSchemaName. If omitted, defaults to 'ERC721'. Other options include 'ERC20' and 'ERC1155'
-    },
-    accountAddress,
-    // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
-    startAmount: value,
-  })
+const createBuyOrder = async (asset, price) => {
+  try {
+    return await seaport.createBuyOrder({
+      asset: {
+        tokenId: asset.tokenId,
+        tokenAddress: asset.tokenAddress,
+        schemaName: asset.schema_name // WyvernSchemaName. If omitted, defaults to 'ERC721'. Other options include 'ERC20' and 'ERC1155'
+      },
+      accountAddress,
+      // Value of the offer, in units of the payment token (or wrapped ETH if none is specified):
+      startAmount: price,
+    })
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+const createBundleBuyOrder = async (assets, price) => {
+  try {
+    return await seaport.createBundleBuyOrder({
+      assets,
+      accountAddress,
+      startAmount: price,
+      //Optional expiration time for the order, in Unix time (seconds):
+      //expirationTime: Math.round(Date.now() / 1000 + 60 * 60 * 24) // One day from now
+    })
+  } catch (err) {
+    console.error(err)
+  }
 }
 
 module.exports = {
@@ -73,4 +91,5 @@ module.exports = {
   singleCollection,
   singleAsset,
   createBuyOrder,
+  createBundleBuyOrder,
 };
