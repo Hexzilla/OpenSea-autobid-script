@@ -8,8 +8,8 @@ const config = {
   }
 }
 
-export const collections = (offset, limit) => {
-  axios
+const collections = async (offset, limit) => {
+  return axios
     .get(`https://api.opensea.io/api/v1/collections?offset=${offset}&limit=${limit}`)
     .then((res) => {
       return res.data;
@@ -17,7 +17,16 @@ export const collections = (offset, limit) => {
     .catch(console.error)
 }
 
-export const singleCollection = (slug) => {
+const assets = async (collection, cursor = '') => {
+  return axios
+    .get(`https://api.opensea.io/api/v1/assets?collection_slug=${collection}&cursor=${cursor}`, config)
+    .then((res) => {
+      return res.data;
+    })
+    .catch(console.error)
+}
+
+const singleCollection = (slug) => {
   axios
     .get(`https://api.opensea.io/api/v1/collection/${slug}`, config)
     .then((res) => {
@@ -26,7 +35,7 @@ export const singleCollection = (slug) => {
     .catch(console.error)
 }
 
-export const singleAsset = (assetContractAddress, tokenId) => {
+const singleAsset = (assetContractAddress, tokenId) => {
   axios
     .get(`https://api.opensea.io/api/v1/asset/${assetContractAddress}/${tokenId}/?include_orders=false`, config)
     .then((res) => {
@@ -35,11 +44,9 @@ export const singleAsset = (assetContractAddress, tokenId) => {
     .catch(console.error)
 }
 
-export const assets = (collection) => {
-  axios
-    .get(`https://api.opensea.io/api/v1/assets?collection_slug=${collection}`, config)
-    .then((res) => {
-      return res.data;
-    })
-    .catch(console.error)
-}
+module.exports = {
+  collections,
+  assets,
+  singleCollection,
+  singleAsset,
+};
