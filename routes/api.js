@@ -74,4 +74,16 @@ router.get('/collection/assets', async (req, res) => {
   res.json({ success: true, assets })
 });
 
+router.get('/bid', async (req, res) => {
+  const address = req.query.address;
+  console.log("Bid.address=", address);
+  const assets = await opensea.createBuyOrder({
+    token_id: 2413,
+    token_address: '0x2b841d4b7ca08d45cc3de814de08850dc3008c43',
+    schema_name: 'ERC721',
+  }, address, 0.001);
+  console.log("~~~~~~~~~~~~~~~~~~~~~", assets);
+  res.json({ success: true, assets })
+});
+
 module.exports = router;
